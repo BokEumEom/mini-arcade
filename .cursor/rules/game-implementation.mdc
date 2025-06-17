@@ -1,0 +1,55 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Game Implementation Guide
+
+## Game Structure
+Each game should follow this structure:
+```
+app/games/[game-id]/
+├── index.tsx        # Main game screen
+├── components/      # Game-specific components
+├── hooks/          # Game-specific hooks
+└── utils/          # Game-specific utilities
+```
+
+## Game Registration
+Games are registered in [constants/Games.ts](mdc:constants/Games.ts):
+```typescript
+{
+  id: 'game-id',
+  title: 'Game Title',
+  description: 'Game Description',
+  icon: 'icon-name' as IconName
+}
+```
+
+## Game Navigation
+Games are accessed through the home screen:
+[app/(tabs)/index.tsx](mdc:app/(tabs)/index.tsx)
+
+## Game Components
+Common game components:
+- `GameCard`: [components/games/GameCard.tsx](mdc:components/games/GameCard.tsx)
+- `GameLayout`: Base layout for game screens
+- `GameHeader`: Game-specific header
+
+## Game Implementation Guidelines
+1. Use theme-aware components
+2. Implement proper game state management
+3. Add game-specific settings if needed
+4. Include game instructions
+5. Add score/achievement tracking
+6. Implement proper game reset functionality
+
+## Available Games
+1. 가위바위보 (Rock Paper Scissors)
+2. 2048
+3. 기억력 게임 (Memory Game)
+4. 스와이프 스퀘어 (Swipe Square)
+5. 테트리스 (Tetris)
+6. 오델로 (Othello)
+7. 탭 서클 (Tap Circle)
+8. 숫자 퍼즐 (Number Puzzle)

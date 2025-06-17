@@ -1,0 +1,32 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Project Structure Guide
+
+## Directory Structure
+- `app/`: Main application screens and navigation
+  - `(tabs)/`: Tab-based navigation screens
+  - `games/`: Individual game screens
+- `components/`: Reusable UI components
+  - `common/`: Shared components (Header, etc.)
+  - `games/`: Game-specific components
+  - `ui/`: Basic UI components
+- `constants/`: Application constants and configurations
+- `context/`: React Context providers
+- `hooks/`: Custom React hooks
+- `utils/`: Utility functions
+
+## Key Files
+- Main navigation: [app/_layout.tsx](mdc:app/_layout.tsx)
+- Home screen: [app/(tabs)/index.tsx](mdc:app/(tabs)/index.tsx)
+- Settings screen: [app/(tabs)/settings.tsx](mdc:app/(tabs)/settings.tsx)
+- Game list: [constants/Games.ts](mdc:constants/Games.ts)
+- Theme context: [context/ThemeContext.tsx](mdc:context/ThemeContext.tsx)
+
+## Component Organization
+- UI components should be placed in `components/ui/`
+- Game-specific components in `components/games/`
+- Shared/common components in `components/common/`
+- Each component should have its own directory with index.tsx

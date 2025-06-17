@@ -1,50 +1,86 @@
-# Welcome to your Expo app 👋
+# Game App
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native mobile game application built with Expo and TypeScript.
 
-## Get started
+## Features
 
-1. Install dependencies
+- Modern React Native development with Expo
+- TypeScript for type safety
+- File-based routing with Expo Router
+- Multiple game experiences
+- Haptic feedback integration
+- Custom animations
+- Responsive layouts
+- Asset management for fonts, images, and animations
+
+## Getting Started
+
+1. Install dependencies:
 
    ```bash
    npm install
    ```
 
-2. Start the app
+2. Start the development server:
 
    ```bash
+   npm start
+   # or
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+3. Run on specific platforms:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+   ```bash
+   # For iOS
+   npm run ios
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+   # For Android
+   npm run android
 
-## Get a fresh project
+   # For web
+   npm run web
+   ```
 
-When you're ready, run:
+## Project Structure
 
-```bash
-npm run reset-project
-```
+- `/app` - Main application screens and navigation setup
+- `/assets` - Static assets (animations, fonts, images, icons)
+- `/components` - Reusable UI components
+- `/constants` - Application-wide constants
+- `/contexts` - React Context providers
+- `/hooks` - Custom React hooks
+- `/types` - TypeScript type definitions
+- `/utils` - Utility functions
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+## Development
 
-## Learn more
+- Edit files in the `/app` directory to modify screens and navigation
+- Use the `reset-project` script to start fresh:
 
-To learn more about developing your project with Expo, look at the following resources:
+  ```bash
+  npm run reset-project
+  ```
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+## Available Scripts
 
-## Join the community
+- `npm start` - Start the Expo development server
+- `npm run ios` - Start the app in iOS simulator
+- `npm run android` - Start the app in Android emulator
+- `npm run web` - Start the app in web browser
+- `npm run lint` - Run ESLint
+- `npm run reset-project` - Reset the project to a clean state
 
-Join our community of developers creating universal apps.
+## Learn More
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+- [Expo Documentation](https://docs.expo.dev/)
+- [React Native Documentation](https://reactnative.dev/)
+- [TypeScript Documentation](https://www.typescriptlang.org/)
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch
+3. Commit your changes
+4. Push to the branch
+5. Create a new Pull Request

@@ -1,0 +1,41 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Theme System Guide
+
+## Theme Implementation
+The app uses a custom theme system with React Navigation integration:
+
+- Theme context: [context/ThemeContext.tsx](mdc:context/ThemeContext.tsx)
+- Theme types: `light` | `dark` | `system`
+- Theme persistence using AsyncStorage
+
+## Theme Components
+- `ThemedView`: Base container with theme-aware background
+- `ThemedText`: Text component with theme-aware colors
+- `ThemedPressable`: Pressable component with theme-aware styles
+
+## Theme Usage
+```typescript
+// Example usage in components
+import { ThemedView, ThemedText } from '@/components/ui/ThemedView';
+
+function MyComponent() {
+  return (
+    <ThemedView>
+      <ThemedText>Theme-aware text</ThemedText>
+    </ThemedView>
+  );
+}
+```
+
+## Theme Colors
+- Light theme: White background, dark text
+- Dark theme: Dark background, light text
+- System theme: Follows device theme settings
+
+## Theme Switching
+Theme can be changed in the settings screen:
+[app/(tabs)/settings.tsx](mdc:app/(tabs)/settings.tsx)

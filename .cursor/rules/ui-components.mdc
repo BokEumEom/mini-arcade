@@ -1,0 +1,46 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# UI Components Guide
+
+## Base Components
+- `ThemedView`: [components/ui/ThemedView.tsx](mdc:components/ui/ThemedView.tsx)
+- `ThemedText`: [components/ui/ThemedText.tsx](mdc:components/ui/ThemedText.tsx)
+- `ThemedPressable`: [components/ui/ThemedPressable.tsx](mdc:components/ui/ThemedPressable.tsx)
+- `IconSymbol`: [components/ui/IconSymbol.tsx](mdc:components/ui/IconSymbol.tsx)
+
+## Common Components
+- `Header`: [components/common/Header.tsx](mdc:components/common/Header.tsx)
+- `GameCard`: [components/games/GameCard.tsx](mdc:components/games/GameCard.tsx)
+
+## Component Guidelines
+1. Use theme-aware components for consistent theming
+2. Follow the component directory structure
+3. Implement proper TypeScript types
+4. Use proper prop types and default values
+5. Include proper documentation
+
+## Icon Usage
+Icons are managed through the `IconSymbol` component:
+```typescript
+import { IconSymbol } from '@/components/ui/IconSymbol';
+
+// Usage
+<IconSymbol name="game-controller" size={24} />
+```
+
+## Available Icons
+- game-controller
+- plus
+- refresh
+- arrow-up
+- square
+- circle
+- hash
+- moon
+- shield
+- file-text
+- info
+- chevron.right
