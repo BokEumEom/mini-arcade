@@ -1,4 +1,4 @@
-import { Achievement } from '../../types/games/tap-circle';
+import { Achievement } from '../../types/games/variants/tap-circle';
 
 export const ACHIEVEMENTS: Achievement[] = [
   {

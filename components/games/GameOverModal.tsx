@@ -2,7 +2,7 @@ import { BlurView } from 'expo-blur';
 import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { GameScore } from '../../types/games';
+import { GameScore } from '../../types/games/common';
 
 interface GameOverModalProps {
   score: GameScore;

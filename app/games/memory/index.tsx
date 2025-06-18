@@ -4,8 +4,8 @@ import { GameOverModal } from '../../../components/games/GameOverModal';
 import { StartScreen } from '../../../components/games/StartScreen';
 import { Card } from '../../../components/memory/Card';
 import { ScoreDisplay } from '../../../components/memory/ScoreDisplay';
-import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games';
-import { Card as CardType } from '../../../types/games/memory';
+import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games/common';
+import { Card as CardType } from '../../../types/games/variants/memory';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = (width - 60) / 4;

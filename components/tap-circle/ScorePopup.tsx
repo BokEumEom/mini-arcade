@@ -1,13 +1,13 @@
 import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
-    Easing,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withDelay,
-    withSequence,
-    withTiming
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withDelay,
+  withSequence,
+  withTiming
 } from 'react-native-reanimated';
 
 interface ScorePopupProps {
@@ -16,7 +16,7 @@ interface ScorePopupProps {
   y: number;
 }
 
-export const ScorePopup = ({ score, x, y }: ScorePopupProps) => {
+export const ScorePopup = React.memo(({ score, x, y }: ScorePopupProps) => {
   const progress = useSharedValue(0);
 
   useEffect(() => {
@@ -76,7 +76,9 @@ export const ScorePopup = ({ score, x, y }: ScorePopupProps) => {
       {score > 0 ? `+${score}` : score}
     </Animated.Text>
   );
-};
+});
+
+ScorePopup.displayName = 'ScorePopup';
 
 const styles = StyleSheet.create({
   scorePopup: {

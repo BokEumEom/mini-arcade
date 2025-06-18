@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet, Modal, TouchableOpacity, Image } from 'react-native';
+import { Image, Modal, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
 type ConfirmationModalProps = {
   visible: boolean;
@@ -18,6 +18,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   confirmText = 'Confirm',
   cancelText = 'Cancel',
 }) => {
+  console.log('ConfirmationModal: Rendering modal, visible:', visible);
+  
   return (
     <Modal transparent={true} visible={visible} animationType="fade">
       <View style={styles.modalOverlay}>
@@ -27,6 +29,9 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             <Image
               source={require('../../assets/icons/warning.png')}
               style={styles.icon}
+              onError={(error) => {
+                console.error('ConfirmationModal: Image loading error:', error);
+              }}
             />
           </View>
 

@@ -1,17 +1,21 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface GameEffectsProps {
   isDoubleScore: boolean;
   isSlowMotion: boolean;
 }
 
-export const GameEffects = ({ isDoubleScore, isSlowMotion }: GameEffectsProps) => {
+export const GameEffects = React.memo(({ isDoubleScore, isSlowMotion }: GameEffectsProps) => {
+  const insets = useSafeAreaInsets();
+  const { width } = useWindowDimensions();
+  
   if (!isDoubleScore && !isSlowMotion) return null;
 
   return (
-    <View style={styles.effectsContainer}>
+    <View style={[styles.effectsContainer, { top: insets.top + 80 }]}>
       {isDoubleScore && (
         <View style={styles.effectBadge}>
           <MaterialCommunityIcons name="multiplication" size={20} color="#FF9800" />
@@ -26,12 +30,13 @@ export const GameEffects = ({ isDoubleScore, isSlowMotion }: GameEffectsProps) =
       )}
     </View>
   );
-};
+});
+
+GameEffects.displayName = 'GameEffects';
 
 const styles = StyleSheet.create({
   effectsContainer: {
     position: 'absolute',
-    top: 120,
     right: 20,
     flexDirection: 'row',
     gap: 10,
@@ -39,9 +44,9 @@ const styles = StyleSheet.create({
   effectBadge: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 15,
     shadowColor: '#000',
     shadowOffset: {
@@ -56,5 +61,6 @@ const styles = StyleSheet.create({
     marginLeft: 5,
     fontSize: 14,
     fontWeight: 'bold',
+    color: '#333',
   },
 }); 

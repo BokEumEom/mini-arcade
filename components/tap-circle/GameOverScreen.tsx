@@ -1,5 +1,4 @@
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { BlurView } from 'expo-blur';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 
@@ -19,7 +18,7 @@ export const GameOverScreen = ({
   const isNewHighScore = score > highScore;
 
   return (
-    <BlurView intensity={20} style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.title}>게임 오버!</Text>
         
@@ -52,7 +51,10 @@ export const GameOverScreen = ({
 
           <TouchableOpacity
             style={[styles.button, styles.exitButton]}
-            onPress={onExit}
+            onPress={() => {
+              console.log('Exit button pressed in GameOverScreen - navigating to main menu');
+              onExit();
+            }}
             accessibilityLabel="나가기"
             accessibilityHint="게임을 종료하고 메인 화면으로 돌아갑니다"
           >
@@ -61,7 +63,7 @@ export const GameOverScreen = ({
           </TouchableOpacity>
         </View>
       </View>
-    </BlurView>
+    </View>
   );
 };
 
@@ -70,13 +72,22 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
   },
   content: {
-    backgroundColor: 'rgba(255, 255, 255, 0.9)',
+    backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderRadius: 20,
     padding: 24,
     width: '80%',
     alignItems: 'center',
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   title: {
     fontSize: 32,

@@ -9,7 +9,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import { GameOverModal } from '../../../components/games/GameOverModal';
 import { StartScreen } from '../../../components/games/StartScreen';
-import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games';
+import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games/common';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const GAME_DURATION = 60; // 60 seconds

@@ -1,16 +1,20 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, useWindowDimensions } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 interface ComboDisplayProps {
   combo: number;
   multiplier: number;
 }
 
-export const ComboDisplay = ({ combo, multiplier }: ComboDisplayProps) => {
+export const ComboDisplay = React.memo(({ combo, multiplier }: ComboDisplayProps) => {
+  const insets = useSafeAreaInsets();
+  const { height } = useWindowDimensions();
+  
   if (combo === 0) return null;
 
   return (
-    <View style={styles.comboContainer}>
+    <View style={[styles.comboContainer, { top: insets.top + 80 }]}>
       <Text style={styles.comboText}>
         {combo} Combo!
       </Text>
@@ -21,14 +25,27 @@ export const ComboDisplay = ({ combo, multiplier }: ComboDisplayProps) => {
       )}
     </View>
   );
-};
+});
+
+ComboDisplay.displayName = 'ComboDisplay';
 
 const styles = StyleSheet.create({
   comboContainer: {
     position: 'absolute',
-    top: 120,
     alignSelf: 'center',
     alignItems: 'center',
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 25,
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
   },
   comboText: {
     fontSize: 24,

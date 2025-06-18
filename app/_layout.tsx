@@ -9,15 +9,21 @@ import { ThemeProvider, useTheme } from '../contexts/ThemeContext';
 
 function RootLayoutNav() {
   const { isDark } = useTheme();
+  
+  console.log('RootLayoutNav: Starting font loading...');
   const [loaded] = useFonts({
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
   });
 
+  console.log('RootLayoutNav: Font loaded:', loaded);
+
   if (!loaded) {
+    console.log('RootLayoutNav: Fonts not loaded yet, returning null');
     // Async font loading only occurs in development.
     return null;
   }
 
+  console.log('RootLayoutNav: Rendering navigation stack');
   return (
     <NavigationThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
       <Stack>
@@ -30,6 +36,7 @@ function RootLayoutNav() {
 }
 
 export default function RootLayout() {
+  console.log('RootLayout: App starting...');
   return (
     <SafeAreaProvider>
       <ThemeProvider>

@@ -52,8 +52,12 @@ export const TARGET_TYPES = {
 
 export const MAX_COMBO_MULTIPLIER = 5;
 export const COMBO_THRESHOLD = 3;
-export const GAME_DURATION = 30;
+export const GAME_DURATION = 60;
 export const HIGH_SCORE_KEY = 'tap_circle_high_score';
+
+// 게임 로직 상수
+export const TARGET_SIZE = 60;
+export const SPAWN_INTERVAL = 1500;
 
 // 특수 효과 지속 시간 (밀리초)
 export const EFFECT_DURATIONS = {

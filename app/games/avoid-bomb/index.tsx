@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Animated, Dimensions, Image, PanResponder, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GameOverModal } from '../../../components/games/GameOverModal';
 import { StartScreen } from '../../../components/games/StartScreen';
-import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games';
+import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games/common';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const GAME_DURATION = 30; // 60 seconds
@@ -10,7 +10,6 @@ const PLAYER_SIZE = SCREEN_WIDTH * 0.25; // 화면 너비의 15%로 설정
 
 // 이미지 프리로드
 const PLAYER_IMAGE = require('../../../assets/games/images/player.png');
-Image.prefetch(PLAYER_IMAGE);
 
 type GameObject = {
   id: string;

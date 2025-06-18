@@ -2,10 +2,10 @@ import { IconName, IconSymbol } from '@/components/ui/IconSymbol';
 import React from 'react';
 import { Dimensions, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring
+    useAnimatedStyle,
+    useSharedValue,
+    withSequence,
+    withSpring
 } from 'react-native-reanimated';
 import { APP_THEME } from '../../constants/appTheme';
 import { useTheme } from '../../contexts/ThemeContext';
@@ -30,6 +30,8 @@ export function GameCard({
   icon,
   onPress 
 }: GameCardProps) {
+  console.log('GameCard: Rendering card:', { title, icon });
+  
   const { isDark } = useTheme();
   const colors = isDark ? APP_THEME.dark : APP_THEME.light;
   const scale = useSharedValue(1);
@@ -83,7 +85,7 @@ const styles = StyleSheet.create({
     height: CARD_HEIGHT,
     borderRadius: 16,
     marginBottom: 12,
-    shadowColor: '#000',
+    shadowColor: '#f0f0f0',
     shadowOffset: {
       width: 0,
       height: 2,

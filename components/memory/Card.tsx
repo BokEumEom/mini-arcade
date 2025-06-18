@@ -6,7 +6,7 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import { CARD_ICONS, Card as CardType } from '../../app/types/games/memory';
+import { CARD_ICONS, Card as CardType } from '../../types/games/variants/memory';
 
 const { width } = Dimensions.get('window');
 const CARD_SIZE = (width - 60) / 4;

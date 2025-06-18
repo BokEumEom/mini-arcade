@@ -1,11 +1,11 @@
 import React, { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import Animated, {
-    Easing,
-    interpolate,
-    useAnimatedStyle,
-    useSharedValue,
-    withTiming
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming
 } from 'react-native-reanimated';
 
 interface ParticleProps {
@@ -14,7 +14,7 @@ interface ParticleProps {
   color: string;
 }
 
-export const Particle = ({ x, y, color }: ParticleProps) => {
+export const Particle = React.memo(({ x, y, color }: ParticleProps) => {
   const progress = useSharedValue(0);
   const angle = Math.random() * Math.PI * 2;
   const distance = 50 + Math.random() * 50;
@@ -71,7 +71,9 @@ export const Particle = ({ x, y, color }: ParticleProps) => {
       ]}
     />
   );
-};
+});
+
+Particle.displayName = 'Particle';
 
 const styles = StyleSheet.create({
   particle: {
