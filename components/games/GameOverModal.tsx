@@ -1,5 +1,4 @@
 import { BlurView } from 'expo-blur';
-import { router } from 'expo-router';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GameScore } from '../../types/games/common';
@@ -23,8 +22,8 @@ export function GameOverModal({ score, onPlayAgain, onExit }: GameOverModalProps
   const rating = getRating(score.score);
 
   const handleExit = () => {
+    console.log('GameOverModal: handleExit called');
     onExit();
-    router.replace('/');
   };
 
   return (

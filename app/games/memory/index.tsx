@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { GameOverModal } from '../../../components/games/GameOverModal';
-import { StartScreen } from '../../../components/games/StartScreen';
 import { Card } from '../../../components/memory/Card';
+import { ParticleEffect } from '../../../components/memory/ParticleEffect';
 import { ScoreDisplay } from '../../../components/memory/ScoreDisplay';
+import { StartScreen } from '../../../components/memory/StartScreen';
+import { MemoryIconCategory, getMemoryIconsForCategory } from '../../../components/ui/IconSymbol';
 import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games/common';
 import { Card as CardType } from '../../../types/games/variants/memory';
 
@@ -17,9 +19,18 @@ export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: Game
   const [cards, setCards] = useState<CardType[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
   const [flipCount, setFlipCount] = useState(0);
+  const [selectedCategory, setSelectedCategory] = useState<MemoryIconCategory>('animals');
+  
+  // 파티클 효과 상태
+  const [particleEffect, setParticleEffect] = useState({
+    isActive: false,
+    centerX: 0,
+    centerY: 0,
+  });
 
-  const initializeCards = () => {
-    const values = Array.from({ length: 8 }, (_, i) => i + 1);
+  const initializeCards = (category: MemoryIconCategory) => {
+    const icons = getMemoryIconsForCategory(category);
+    const values = Array.from({ length: 8 }, (_, i) => i + 1); // 8쌍의 카드 (총 16장)
     const pairs = [...values, ...values];
     const shuffled = pairs.sort(() => Math.random() - 0.5);
     return shuffled.map((value, index) => ({
@@ -79,19 +90,40 @@ export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: Game
   const handlePlayAgain = () => {
     setIsGameOver(false);
     setScore({ score: 0, combo: 0, highScore: score.highScore });
-    setCards(initializeCards());
+    setCards(initializeCards(selectedCategory));
     setFlipCount(0);
     setIsPlaying(true);
   };
 
-  const handleStart = () => {
-    setCards(initializeCards());
+  const handleStart = (category: MemoryIconCategory) => {
+    setSelectedCategory(category);
+    setCards(initializeCards(category));
     setFlipCount(0);
     setIsPlaying(true);
   };
 
   const handleExit = () => {
+    console.log('=== MEMORY GAME HANDLE EXIT ===');
+    console.log('handleExit called in MemoryGame');
+    console.log('onGameOver function:', typeof onGameOver);
+    console.log('Current score:', score);
+    console.log('Calling onGameOver...');
     onGameOver?.(score);
+    console.log('onGameOver called successfully');
+  };
+
+  // 파티클 효과 트리거
+  const handleMatch = (x: number, y: number) => {
+    setParticleEffect({
+      isActive: true,
+      centerX: x,
+      centerY: y,
+    });
+  };
+
+  // 파티클 효과 완료
+  const handleParticleComplete = () => {
+    setParticleEffect(prev => ({ ...prev, isActive: false }));
   };
 
   useEffect(() => {
@@ -114,24 +146,33 @@ export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: Game
             <Card
               key={card.id}
               card={card}
+              category={selectedCategory}
               onPress={() => handleCardPress(card.id)}
+              onMatch={handleMatch}
             />
           ))}
         </View>
       </View>
 
+      {/* 파티클 효과 */}
+      <ParticleEffect
+        isActive={particleEffect.isActive}
+        centerX={particleEffect.centerX}
+        centerY={particleEffect.centerY}
+        onComplete={handleParticleComplete}
+      />
+
       {!isPlaying && (
         <StartScreen
           onStart={handleStart}
-          title="Memory Game!"
-          buttonText="Start Game"
+          onExit={handleExit}
+          highScore={score.highScore}
         />
       )}
 
       {isGameOver && (
         <GameOverModal
           score={score}
-          flipCount={flipCount}
           onPlayAgain={handlePlayAgain}
           onExit={handleExit}
         />
@@ -154,6 +195,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'center',
-    gap: 10,
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 10,
   },
 }); 

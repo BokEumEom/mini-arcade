@@ -1,22 +1,26 @@
-import { MaterialIcons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import React from 'react';
-import { Dimensions, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useRef } from 'react';
+import { Dimensions, StyleSheet, TouchableOpacity, View } from 'react-native';
 import Animated, {
   useAnimatedStyle,
   withTiming,
 } from 'react-native-reanimated';
-import { CARD_ICONS, Card as CardType } from '../../types/games/variants/memory';
+import { Card as CardType } from '../../types/games/variants/memory';
+import { getMemoryIconsForCategory, IconSymbol, MemoryIconCategory } from '../ui/IconSymbol';
 
 const { width } = Dimensions.get('window');
-const CARD_SIZE = (width - 60) / 4;
+const CARD_SIZE = (width - 80) / 4;
 
 interface CardProps {
   card: CardType;
+  category: MemoryIconCategory;
   onPress: () => void;
+  onMatch?: (x: number, y: number) => void;
 }
 
-export const Card: React.FC<CardProps> = ({ card, onPress }) => {
+export const Card: React.FC<CardProps> = ({ card, category, onPress, onMatch }) => {
+  const cardRef = useRef<View>(null);
+
   const flipAnimation = useAnimatedStyle(() => ({
     transform: [
       { perspective: 1000 },
@@ -24,9 +28,24 @@ export const Card: React.FC<CardProps> = ({ card, onPress }) => {
     ]
   }));
 
+  const icons = getMemoryIconsForCategory(category);
+  const iconName = icons[card.value - 1];
+
+  // 매칭 성공 시 파티클 효과 트리거
+  React.useEffect(() => {
+    if (card.isMatched && onMatch) {
+      // 카드의 중앙 위치 계산
+      cardRef.current?.measure((x, y, width, height, pageX, pageY) => {
+        const centerX = pageX + width / 2;
+        const centerY = pageY + height / 2;
+        onMatch(centerX, centerY);
+      });
+    }
+  }, [card.isMatched, onMatch]);
+
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>
-      <Animated.View style={[styles.card, flipAnimation]}>
+      <Animated.View ref={cardRef} style={[styles.card, flipAnimation]}>
         <LinearGradient
           colors={card.isMatched 
             ? ['#4CAF50', '#45a049'] 
@@ -36,13 +55,13 @@ export const Card: React.FC<CardProps> = ({ card, onPress }) => {
           style={styles.cardGradient}
         >
           {card.isFlipped ? (
-            <MaterialIcons 
-              name={CARD_ICONS[card.value - 1]} 
+            <IconSymbol 
+              name={iconName as any} 
               size={40} 
               color="#fff" 
             />
           ) : (
-            <MaterialIcons name="help-outline" size={32} color="#fff" />
+            <IconSymbol name="help" size={32} color="#fff" />
           )}
         </LinearGradient>
       </Animated.View>
