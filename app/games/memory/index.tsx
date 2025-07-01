@@ -1,6 +1,7 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { Dimensions, StyleSheet, View } from 'react-native';
 import { GameOverModal } from '../../../components/games/GameOverModal';
+import { LoadingScreen } from '../../../components/games/LoadingScreen';
 import { Card } from '../../../components/memory/Card';
 import { ParticleEffect } from '../../../components/memory/ParticleEffect';
 import { ScoreDisplay } from '../../../components/memory/ScoreDisplay';
@@ -15,6 +16,7 @@ const CARD_SIZE = (width - 60) / 4;
 export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: GameProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isGameOver, setIsGameOver] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [score, setScore] = useState<GameScore>({ score: 0, combo: 0, highScore: 0 });
   const [cards, setCards] = useState<CardType[]>([]);
   const [flippedCards, setFlippedCards] = useState<number[]>([]);
@@ -39,6 +41,12 @@ export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: Game
       isFlipped: false,
       isMatched: false,
     }));
+  };
+
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    setIsPlaying(true);
   };
 
   const handleCardPress = (cardId: number) => {
@@ -92,14 +100,14 @@ export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: Game
     setScore({ score: 0, combo: 0, highScore: score.highScore });
     setCards(initializeCards(selectedCategory));
     setFlipCount(0);
-    setIsPlaying(true);
+    setIsLoading(true); // 로딩 화면 표시
   };
 
   const handleStart = (category: MemoryIconCategory) => {
     setSelectedCategory(category);
     setCards(initializeCards(category));
     setFlipCount(0);
-    setIsPlaying(true);
+    setIsLoading(true); // 로딩 화면 표시
   };
 
   const handleExit = () => {
@@ -113,13 +121,13 @@ export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: Game
   };
 
   // 파티클 효과 트리거
-  const handleMatch = (x: number, y: number) => {
+  const handleMatch = useCallback((x: number, y: number) => {
     setParticleEffect({
       isActive: true,
       centerX: x,
       centerY: y,
     });
-  };
+  }, []);
 
   // 파티클 효과 완료
   const handleParticleComplete = () => {
@@ -128,9 +136,23 @@ export default function MemoryGame({ config = DEFAULT_CONFIG, onGameOver }: Game
 
   useEffect(() => {
     if (cards.length > 0 && cards.every(card => card.isMatched)) {
+      console.log('=== GAME COMPLETED ===');
+      console.log('All cards matched, calling onGameOver');
       setIsGameOver(true);
+      onGameOver?.(score);
     }
-  }, [cards]);
+  }, [cards, onGameOver, score]);
+
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="MEMORY"
+        onLoadingComplete={handleLoadingComplete}
+        duration={1800}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>

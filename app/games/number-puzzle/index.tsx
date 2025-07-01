@@ -1,16 +1,17 @@
 // app/game/numberpuz.tsx
-import React, { useState, useEffect } from 'react';
-import { Dimensions, View, StyleSheet, TouchableOpacity, Text } from 'react-native';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withTiming,
-} from 'react-native-reanimated';
-import { useNumberPuzzle } from '@/hooks/useNumberPuzzle';
+import ResultModal from '@/components/common/ResultModal';
+import { LoadingScreen } from '@/components/games/LoadingScreen';
 import NumberGrid from '@/components/numberpuz/NumberGrid';
 import NumberPuzzleMenu from '@/components/numberpuz/NumberPuzzleMenu';
-import ResultModal from '@/components/common/ResultModal';
-import { RotateCw, LayoutGrid } from 'lucide-react-native';
+import { useNumberPuzzle } from '@/hooks/useNumberPuzzle';
+import { LayoutGrid, RotateCw } from 'lucide-react-native';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from 'react-native-reanimated';
 
 const { width } = Dimensions.get('window');
 const BUTTON_WIDTH = width * 0.4;
@@ -21,12 +22,20 @@ const MESSAGES = ["안녕! 난 소란", "잘했어! 문제없을 거야!", "멋�
 const NumberPuzzleGame = () => {
   const [puzzleSize, setPuzzleSize] = useState<number | null>(null);
   const [modalResult, setModalResult] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   const size = puzzleSize || 16; // 기본값: 4x4
   const { numbers, isCompleted, handlePress, resetGame } = useNumberPuzzle(size);
 
   const transition = useSharedValue(0); // 애니메이션 전환 상태 (0: 메뉴, 1: 게임)
 
   const [messageIndex, setMessageIndex] = useState(0);
+
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    resetGame();
+    transition.value = withTiming(1, { duration: 200 }); // 메뉴 -> 게임 화면
+  };
 
   useEffect(() => {
     if (isCompleted) {
@@ -35,13 +44,13 @@ const NumberPuzzleGame = () => {
   }, [isCompleted]);
 
   useEffect(() => {
-    if (puzzleSize !== null) {
+    if (puzzleSize !== null && !isLoading) {
       resetGame();
       transition.value = withTiming(1, { duration: 200 }); // 메뉴 -> 게임 화면
-    } else {
+    } else if (puzzleSize === null) {
       transition.value = withTiming(0, { duration: 200 }); // 게임 -> 메뉴 화면
     }
-  }, [puzzleSize]);
+  }, [puzzleSize, isLoading]);
 
   // 응원 메시지 인터벌 설정
   useEffect(() => {
@@ -63,7 +72,19 @@ const NumberPuzzleGame = () => {
 
   const handleSelectSize = (selectedSize: number) => {
     setPuzzleSize(selectedSize);
+    setIsLoading(true);
   };
+
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="NUMBER PUZZLE"
+        onLoadingComplete={handleLoadingComplete}
+        duration={1600}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -82,7 +103,7 @@ const NumberPuzzleGame = () => {
         
         {/* 버튼을 한 줄에 배치 */}
         <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.button} onPress={resetGame}>
+          <TouchableOpacity style={styles.button} onPress={() => setIsLoading(true)}>
             <View style={styles.buttonContent}>
               <RotateCw color="#333" size={20} />
               <Text style={styles.buttonText}>다시 시작</Text>

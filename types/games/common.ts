@@ -13,7 +13,8 @@ export type GameType =
   | 'tetris'
   | 'othello'
   | 'number-puzzle'
-  | 'quick-math';
+  | 'quick-math'
+  | 'tower-defense';
 
 export interface Game {
   id: GameType;

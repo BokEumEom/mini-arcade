@@ -50,7 +50,7 @@ export const StartScreen = React.memo(({ onStart, onExit, highScore }: StartScre
                   onPress={() => setSelectedCategory(category.key)}
                 >
                   <View style={styles.categoryIcons}>
-                    {icons.slice(0, 4).map((iconName, index) => (
+                    {icons.slice(1, 5).map((iconName, index) => (
                       <IconSymbol
                         key={index}
                         name={iconName as any}

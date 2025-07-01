@@ -4,6 +4,7 @@ import { BackHandler, Dimensions, Pressable, StyleSheet, Text, TouchableOpacity,
 import { useGameLogic } from '../../hooks/tap-circle/useGameLogic';
 import { useGameState } from '../../hooks/tap-circle/useGameState';
 import { Particle as ParticleType, ScorePopup as ScorePopupType, Target as TargetType } from '../../types/games/variants/tap-circle';
+import { LoadingScreen } from '../games/LoadingScreen';
 import { AchievementAlert } from './AchievementAlert';
 import { ComboDisplay } from './ComboDisplay';
 import { GameEffects } from './GameEffects';
@@ -25,6 +26,7 @@ export const Game = ({ onExit }: GameProps) => {
   const dismissedAchievementsRef = useRef<Set<string>>(new Set());
   const [isPaused, setIsPaused] = useState(false);
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   
   const {
     gameState,
@@ -40,6 +42,12 @@ export const Game = ({ onExit }: GameProps) => {
     setEffect,
     setGameActive,
   } = useGameState();
+
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    startGame();
+  };
 
   const onScoreChange = useCallback((newScore: number) => {
     const totalScore = gameState.score + newScore;
@@ -166,6 +174,17 @@ export const Game = ({ onExit }: GameProps) => {
     onEffectChange,
   });
 
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="TAP CIRCLE"
+        onLoadingComplete={handleLoadingComplete}
+        duration={1700}
+      />
+    );
+  }
+
   const handleScreenPress = useCallback(
     (event: any) => {
       console.log('Screen pressed!', {
@@ -242,12 +261,12 @@ export const Game = ({ onExit }: GameProps) => {
     }));
     updateAchievements(resetAchievements);
     
-    startGame();
-  }, [startGame, gameState.achievements, updateAchievements]);
+    setIsLoading(true); // 로딩 화면 표시
+  }, [gameState.achievements, updateAchievements]);
 
   const handleRestart = useCallback(() => {
-    startGame();
-  }, [startGame]);
+    setIsLoading(true); // 로딩 화면 표시
+  }, []);
 
   const handleAchievementClose = useCallback(() => {
     // 완료된 achievement를 제거하고 닫힌 것으로 표시

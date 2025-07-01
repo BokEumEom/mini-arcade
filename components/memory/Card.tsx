@@ -20,6 +20,7 @@ interface CardProps {
 
 export const Card: React.FC<CardProps> = ({ card, category, onPress, onMatch }) => {
   const cardRef = useRef<View>(null);
+  const hasTriggeredMatch = useRef(false);
 
   const flipAnimation = useAnimatedStyle(() => ({
     transform: [
@@ -33,7 +34,8 @@ export const Card: React.FC<CardProps> = ({ card, category, onPress, onMatch }) 
 
   // 매칭 성공 시 파티클 효과 트리거
   React.useEffect(() => {
-    if (card.isMatched && onMatch) {
+    if (card.isMatched && onMatch && !hasTriggeredMatch.current) {
+      hasTriggeredMatch.current = true;
       // 카드의 중앙 위치 계산
       cardRef.current?.measure((x, y, width, height, pageX, pageY) => {
         const centerX = pageX + width / 2;
@@ -42,6 +44,13 @@ export const Card: React.FC<CardProps> = ({ card, category, onPress, onMatch }) 
       });
     }
   }, [card.isMatched, onMatch]);
+
+  // 카드가 매칭되지 않았을 때 ref 초기화
+  React.useEffect(() => {
+    if (!card.isMatched) {
+      hasTriggeredMatch.current = false;
+    }
+  }, [card.isMatched]);
 
   return (
     <TouchableOpacity onPress={onPress} activeOpacity={0.8}>

@@ -13,12 +13,14 @@ import {
   Cake,
   Calculator,
   Camera,
+  Candy,
+  Castle,
   Cat,
   Check,
   ChevronDown,
   ChevronLeft,
   ChevronRight,
-  ChevronUp,
+  ChevronsUp,
   Circle,
   Cloud,
   Computer,
@@ -83,9 +85,12 @@ import {
   Upload,
   User,
   Video,
+  Videotape,
   Wrench,
   X,
-  Zap
+  Ghost,
+  Zap,
+  RefreshCcw,
 } from 'lucide-react-native';
 import React from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
@@ -112,6 +117,9 @@ export type IconName =
   | 'file-text'
   | 'info'
   | 'chevron.right'
+  | 'chevron.left'
+  | 'chevron.up'
+  | 'chevron.down'
   | 'battery-full'
   | 'swords'
   | 'joystick'
@@ -128,10 +136,10 @@ export type IconName =
   | 'zap'
   | 'help'
   | 'cake'
+  | 'candy'
   | 'pets'
   | 'sports-soccer'
   | 'music-note'
-  | 'favorite'
   | 'star'
   | 'emoji-emotions'
   | 'celebration'
@@ -163,7 +171,11 @@ export type IconName =
   | 'turtle'
   | 'rat'
   | 'snail'
-  | 'shrimp';
+  | 'shrimp'
+  | 'videotape'
+  | 'castle'
+  | 'ghost'
+  | 'refresh-ccw';
 
 // Category-based icon mappings for memory game
 export const MEMORY_ICON_CATEGORIES = {
@@ -201,12 +213,14 @@ const MAPPING = {
   'image': Image,
   'house.fill': Home,
   'paperplane.fill': Send,
+  'chevron.left': ChevronLeft,
   'chevron.left.forwardslash.chevron.right': ChevronLeft,
   'chevron.right': ChevronRight,
-  'chevron.up': ChevronUp,
+  'chevron.up': ChevronsUp,
   'chevron.down': ChevronDown,
   'xmark': X,
   'checkmark': Check,
+  'candy': Candy,
   'star': Star,
   'heart': Heart,
   'share': Share,
@@ -239,7 +253,7 @@ const MAPPING = {
   'pets': Cat,
   'sports-soccer': Target,
   'music-note': Music,
-  'favorite': Heart,
+  'videotape': Videotape,
   'emoji-emotions': Smile,
   'celebration': PartyPopper,
   'cat': Cat,
@@ -266,7 +280,10 @@ const MAPPING = {
   'turtle': Turtle,
   'rat': Rat,
   'snail': Snail,
-  'shrimp': Shrimp
+  'shrimp': Shrimp,
+  'castle': Castle,
+  'ghost': Ghost,
+  'refresh-ccw': RefreshCcw,
 } as const;
 
 interface IconSymbolProps {
@@ -277,7 +294,6 @@ interface IconSymbolProps {
 }
 
 export function IconSymbol({ name, size = 24, color = '#000', style }: IconSymbolProps) {
-  console.log('IconSymbol: Rendering icon:', { name, size, color });
   
   const Icon = MAPPING[name];
   
@@ -286,8 +302,6 @@ export function IconSymbol({ name, size = 24, color = '#000', style }: IconSymbo
     console.error('IconSymbol: Available icons:', Object.keys(MAPPING));
     return null;
   }
-  
-  console.log('IconSymbol: Icon component found:', typeof Icon);
   
   try {
     return <Icon size={size} color={color} style={style} />;

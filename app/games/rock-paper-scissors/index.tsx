@@ -1,102 +1,84 @@
-import { BlurView } from 'expo-blur';
-import { useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { StatusBar } from 'expo-status-bar';
+import React, { useState } from 'react';
+import { ImageBackground, StyleSheet, View } from 'react-native';
+
 import { GameOverModal } from '../../../components/games/GameOverModal';
-import { StartScreen } from '../../../components/games/StartScreen';
-import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games/common';
+import { LoadingScreen } from '../../../components/games/LoadingScreen';
+import { GameProps } from '../../../types/games/common';
 
-type Choice = 'rock' | 'paper' | 'scissors';
+import { Battlefield } from '../../../components/rock-paper-scissors/Battlefield';
+import { Controls } from '../../../components/rock-paper-scissors/Controls';
+import { Footer } from '../../../components/rock-paper-scissors/Footer';
+import { Header } from '../../../components/rock-paper-scissors/Header';
+import { ResultDisplay } from '../../../components/rock-paper-scissors/ResultDisplay';
+import { ScoreDisplay } from '../../../components/rock-paper-scissors/ScoreDisplay';
+import { StartScreen } from '../../../components/rock-paper-scissors/StartScreen';
+import { useRockPaperScissors } from '../../../hooks/useRockPaperScissors';
 
-export default function RockPaperScissorsGame({ config = DEFAULT_CONFIG, onGameOver }: GameProps) {
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [isGameOver, setIsGameOver] = useState(false);
-  const [score, setScore] = useState<GameScore>({ score: 0, combo: 0, highScore: 0 });
-  const [playerChoice, setPlayerChoice] = useState<Choice | null>(null);
-  const [computerChoice, setComputerChoice] = useState<Choice | null>(null);
+export default function RockPaperScissorsGame(props: GameProps) {
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const {
+    isPlaying,
+    isGameOver,
+    score,
+    computerScore,
+    playerChoice,
+    computerChoice,
+    result,
+    round,
+    handlers,
+  } = useRockPaperScissors(props);
 
-  const handlePlayAgain = () => {
-    setIsGameOver(false);
-    setScore({ score: 0, combo: 0, highScore: score.highScore });
-    setIsPlaying(true);
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    handlers.handleStart();
   };
 
-  const handleExit = () => {
-    onGameOver?.(score);
-  };
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="ROCK PAPER SCISSORS"
+        onLoadingComplete={handleLoadingComplete}
+        duration={1400}
+      />
+    );
+  }
 
-  const getComputerChoice = (): Choice => {
-    const choices: Choice[] = ['rock', 'paper', 'scissors'];
-    return choices[Math.floor(Math.random() * choices.length)];
-  };
-
-  const determineWinner = (player: Choice, computer: Choice): number => {
-    if (player === computer) return 0;
-    if (
-      (player === 'rock' && computer === 'scissors') ||
-      (player === 'paper' && computer === 'rock') ||
-      (player === 'scissors' && computer === 'paper')
-    ) {
-      return 1;
-    }
-    return -1;
-  };
-
-  const handleChoice = (choice: Choice) => {
-    const computer = getComputerChoice();
-    setPlayerChoice(choice);
-    setComputerChoice(computer);
-
-    const result = determineWinner(choice, computer);
-    if (result === 1) {
-      setScore(prev => ({ 
-        score: prev.score + 1, 
-        combo: prev.combo + 1,
-        highScore: Math.max(prev.highScore, prev.score + 1)
-      }));
-    } else if (result === -1) {
-      setScore(prev => ({ 
-        score: prev.score, 
-        combo: 0,
-        highScore: prev.highScore
-      }));
-      setIsGameOver(true);
-    }
-  };
+  if (!isPlaying) {
+    return (
+      <StartScreen
+        onStart={() => setIsLoading(true)}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
-      <BlurView intensity={20} style={styles.header}>
-        <Text style={styles.score}>Score: {score.score}</Text>
-        <Text style={styles.combo}>Combo: {score.combo}x</Text>
-      </BlurView>
-
-      <View style={styles.gameArea}>
-        {playerChoice && computerChoice && (
-          <View style={styles.choices}>
-            <Text style={styles.choiceText}>You: {playerChoice}</Text>
-            <Text style={styles.choiceText}>Computer: {computerChoice}</Text>
+      <StatusBar style="light" />
+      <ImageBackground
+        source={{ uri: 'https://www.publicdomainpictures.net/pictures/30000/velka/pixel-background.jpg' }}
+        style={styles.background}
+      >
+        <View style={styles.overlay}>
+          <Header />
+          <View style={styles.gameArea}>
+            <Battlefield playerChoice={playerChoice} computerChoice={computerChoice} />
+            <ResultDisplay result={result} />
+            <ScoreDisplay playerScore={score.score} computerScore={computerScore} />
+            <Controls onChoice={handlers.handleChoice} />
           </View>
-        )}
-        <View style={styles.buttons}>
-          <Text style={styles.button} onPress={() => handleChoice('rock')}>✊</Text>
-          <Text style={styles.button} onPress={() => handleChoice('paper')}>✋</Text>
-          <Text style={styles.button} onPress={() => handleChoice('scissors')}>✌️</Text>
+          <Footer round={round} />
         </View>
-      </View>
-
-      {!isPlaying && (
-        <StartScreen
-          onStart={() => setIsPlaying(true)}
-          title="Rock Paper Scissors!"
-          buttonText="Start Game"
-        />
-      )}
+      </ImageBackground>
 
       {isGameOver && (
         <GameOverModal
           score={score}
-          onPlayAgain={handlePlayAgain}
-          onExit={handleExit}
+          onPlayAgain={() => setIsLoading(true)}
+          onExit={handlers.handleExit}
         />
       )}
     </View>
@@ -108,40 +90,16 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: '#000',
   },
-  header: {
-    padding: 20,
-    flexDirection: 'row',
+  background: {
+    flex: 1,
+  },
+  overlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
     justifyContent: 'space-between',
-  },
-  score: {
-    color: '#fff',
-    fontSize: 18,
-  },
-  combo: {
-    color: '#fff',
-    fontSize: 18,
   },
   gameArea: {
     flex: 1,
     justifyContent: 'center',
-    alignItems: 'center',
-  },
-  choices: {
-    marginBottom: 40,
-  },
-  choiceText: {
-    color: '#fff',
-    fontSize: 24,
-    marginVertical: 10,
-  },
-  buttons: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    width: '100%',
-    paddingHorizontal: 20,
-  },
-  button: {
-    fontSize: 50,
-    padding: 20,
   },
 }); 

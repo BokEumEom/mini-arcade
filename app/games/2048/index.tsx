@@ -1,13 +1,14 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
-import Animated from 'react-native-reanimated';
-import { GameProvider, useGame } from '@/contexts/TileContext';
-import GameBoard from '@/components/puzzle/GameBoard';
-import ScoreBoard from '@/components/puzzle/ScoreBoard';
 import { Button } from '@/components/common/Button';
-import KeyboardControls from '@/components/puzzle/KeyboardControls';
 import ConfirmationModal from '@/components/common/Modal';
+import { LoadingScreen } from '@/components/games/LoadingScreen';
+import GameBoard from '@/components/puzzle/GameBoard';
+import KeyboardControls from '@/components/puzzle/KeyboardControls';
+import ScoreBoard from '@/components/puzzle/ScoreBoard';
+import { GameProvider, useGame } from '@/contexts/TileContext';
 import { useTileGestures } from '@/hooks/useTileGestures';
+import React, { useState } from 'react';
+import { StyleSheet, Text, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 const PuzzleScreen = () => {
   return (
@@ -20,9 +21,15 @@ const PuzzleScreen = () => {
 const PuzzleGame = () => {
   const { moveTiles, gameOver, restartGame } = useGame();
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
   
   // 커스텀 훅 사용
   const { panResponder, animatedStyle } = useTileGestures(moveTiles);
+
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+  };
 
   // Handler for "New Game" button
   const handleNewGamePress = () => {
@@ -31,7 +38,7 @@ const PuzzleGame = () => {
 
   const confirmNewGame = () => {
     setShowModal(false);
-    restartGame();
+    setIsLoading(true); // 로딩 화면 표시
   };
 
   const cancelNewGame = () => {
@@ -42,6 +49,17 @@ const PuzzleGame = () => {
   const handleMove = (direction: 'up' | 'down' | 'left' | 'right') => {
     moveTiles(direction);
   };
+
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="2048"
+        onLoadingComplete={handleLoadingComplete}
+        duration={1500}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>

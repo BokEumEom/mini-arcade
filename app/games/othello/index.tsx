@@ -1,11 +1,14 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
 import ResultModal from '@/components/common/ResultModal';
+import { LoadingScreen } from '@/components/games/LoadingScreen';
 import GameModeScreen from '@/components/reversi/GameModeScreen';
 import GameScreen from '@/components/reversi/GameScreen';
 import { useReversiGame } from '@/hooks/useReversiGame';
+import React, { useState } from 'react';
+import { StyleSheet, View } from 'react-native';
 
 const ReversiGame = () => {
+  const [isLoading, setIsLoading] = useState(false);
+  
   const { 
     state, 
     dispatch, 
@@ -14,6 +17,23 @@ const ReversiGame = () => {
     startGameWithAnimation, 
     resetGame,
   } = useReversiGame();
+
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    startGameWithAnimation();
+  };
+
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="OTHELLO"
+        onLoadingComplete={handleLoadingComplete}
+        duration={1800}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -27,7 +47,7 @@ const ReversiGame = () => {
           animatedStyle={animatedStyle}
           selectedMode={{ singlePlayer: state.isSinglePlayer, aiAs: state.aiPlayer }}
           onModeSelect={(singlePlayer, aiAs) => resetGame(singlePlayer, aiAs)}
-          onStartGame={startGameWithAnimation}
+          onStartGame={() => setIsLoading(true)}
         />
       ) : (
         <GameScreen 
@@ -39,7 +59,7 @@ const ReversiGame = () => {
           playableCells={state.playableCells}
           gameOver={state.gameOver}
           onCellPress={handleCellPress}
-          onResetGame={resetGame}
+          onResetGame={() => setIsLoading(true)}
         />
       )}
     </View>

@@ -10,8 +10,6 @@ import { useColorScheme } from '@/hooks/useColorScheme';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
-  
-  console.log('TabLayout: Rendering tab layout with colorScheme:', colorScheme);
 
   return (
     <Tabs
@@ -35,7 +33,6 @@ export default function TabLayout() {
         options={{
           title: '게임',
           tabBarIcon: ({ color }) => {
-            console.log('TabLayout: Rendering computer icon with color:', color);
             return <IconSymbol size={28} name="computer" color={color} />;
           },
         }}
@@ -45,7 +42,6 @@ export default function TabLayout() {
         options={{
           title: '세팅',
           tabBarIcon: ({ color }) => {
-            console.log('TabLayout: Rendering wrench icon with color:', color);
             return <IconSymbol size={28} name="wrench" color={color} />;
           },
         }}

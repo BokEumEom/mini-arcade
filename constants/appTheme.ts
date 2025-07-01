@@ -9,10 +9,12 @@ const PRIMARY_DARK = '#150A0D';
 const ACCENT_COLOR = '#FF4D6D';
 const ACCENT_LIGHT = '#FF6B8B';
 const ACCENT_DARK = '#E63E5C';
+const GRAY_COLOR = '#9BA1A6';
 
 export const APP_THEME = {
   light: {
     text: '#FFFFFF',
+    textSecondary: GRAY_COLOR,
     background: PRIMARY_COLOR,
     tabBar: '#282828',
     tint: ACCENT_COLOR,
@@ -37,6 +39,7 @@ export const APP_THEME = {
   },
   dark: {
     text: '#FFFFFF',
+    textSecondary: GRAY_COLOR,
     background: PRIMARY_DARK,
     tabBar: '#1A1A1A',
     tint: ACCENT_COLOR,

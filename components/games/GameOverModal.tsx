@@ -22,7 +22,6 @@ export function GameOverModal({ score, onPlayAgain, onExit }: GameOverModalProps
   const rating = getRating(score.score);
 
   const handleExit = () => {
-    console.log('GameOverModal: handleExit called');
     onExit();
   };
 

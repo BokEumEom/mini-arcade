@@ -1,18 +1,20 @@
 // app/game/tetris.tsx
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, Dimensions } from 'react-native';
-import { useTetrisLogic } from '@/hooks/useTetrisLogic';
+import { LoadingScreen } from '@/components/games/LoadingScreen';
 import Board from '@/components/tetris/Board';
-import Scoreboard from '@/components/tetris/Scoreboard';
 import GameControls from '@/components/tetris/GameControls';
 import MainMenu from '@/components/tetris/MainMenu';
 import NextBlock from '@/components/tetris/NextBlock';
-import Animated, { useSharedValue, useAnimatedStyle, withTiming } from 'react-native-reanimated';
+import Scoreboard from '@/components/tetris/Scoreboard';
+import { useTetrisLogic } from '@/hooks/useTetrisLogic';
+import React, { useEffect, useState } from 'react';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
 
 const TetrisGame = () => {
   const [isGameStarted, setIsGameStarted] = useState(false); // State to track if the game is started
+  const [isLoading, setIsLoading] = useState(false);
   const { 
     board, 
     currentPiece,
@@ -56,11 +58,29 @@ const TetrisGame = () => {
     return () => clearInterval(interval);
   }, [isGameStarted, isGameOver, level, updateGame]);
 
-  // Handle game start with animation
-  const startGame = () => {
-    animationProgress.value = 1; // Trigger transition to game screen
-    setTimeout(() => setIsGameStarted(true), 500); // Wait for animation to complete
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    // 로딩 완료 후 게임 시작 애니메이션
+    animationProgress.value = 1;
+    setTimeout(() => setIsGameStarted(true), 500);
   };
+
+  // Handle game start with loading screen
+  const startGame = () => {
+    setIsLoading(true);
+  };
+
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="TETRIS"
+        onLoadingComplete={handleLoadingComplete}
+        duration={2000}
+      />
+    );
+  }
 
   return (
     <View style={styles.container}>

@@ -1,6 +1,15 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import { COLORS } from '@/constants/pac-man/constants';
+import { Clock, Plus, Star, Trophy, Zap } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, {
+  Easing,
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withRepeat,
+  withTiming
+} from 'react-native-reanimated';
 
 interface StartScreenProps {
   onStart: () => void;
@@ -8,161 +17,199 @@ interface StartScreenProps {
   highScore: number;
 }
 
-export const StartScreen = React.memo(({ onStart, onExit, highScore }: StartScreenProps) => {
+export function StartScreen({ onStart, onExit, highScore }: StartScreenProps) {
+  const pulseAnimation = useSharedValue(0);
+  const floatAnimation = useSharedValue(0);
+
+  React.useEffect(() => {
+    // 제목 맥박 효과
+    pulseAnimation.value = withRepeat(
+      withTiming(1, { duration: 2000, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true
+    );
+
+    // 버튼 부드러운 움직임
+    floatAnimation.value = withRepeat(
+      withTiming(1, { duration: 3000, easing: Easing.inOut(Easing.ease) }),
+      -1,
+      true
+    );
+  }, []);
+
+  const handleStart = () => {
+    console.log('Start button clicked');
+    onStart();
+  };
+
+  const handleExit = () => {
+    console.log('Exit button clicked');
+    onExit();
+  };
+
+  const titleStyle = useAnimatedStyle(() => {
+    const scale = interpolate(pulseAnimation.value, [0, 1], [1, 1.05]);
+    const opacity = interpolate(pulseAnimation.value, [0, 1], [1, 0.8]);
+    return {
+      transform: [{ scale }],
+      opacity,
+    };
+  });
+
+  const buttonStyle = useAnimatedStyle(() => {
+    const translateY = interpolate(floatAnimation.value, [0, 1], [0, -5]);
+    return {
+      transform: [{ translateY }],
+    };
+  });
+
   return (
     <View style={styles.container}>
-      <View style={styles.content}>
-        <View style={styles.titleContainer}>
-          <MaterialCommunityIcons name="calculator" size={64} color="#667eea" />
-          <Text style={styles.title}>Quick Math</Text>
-          <Text style={styles.subtitle}>빠른 계산으로 점수를 올리세요!</Text>
+      <Animated.Text style={[styles.title, titleStyle]}>QUICK MATH</Animated.Text>
+      <Text style={styles.subtitle}>빠른 계산으로 점수를 올리세요!</Text>
+      
+      <Animated.View style={buttonStyle}>
+        <TouchableOpacity style={styles.startButton} onPress={handleStart}>
+          <Text style={styles.startButtonText}>게임 시작</Text>
+        </TouchableOpacity>
+      </Animated.View>
+
+      {highScore > 0 && (
+        <View style={styles.highScoreContainer}>
+          <Trophy size={20} color="#FFD700" />
+          <Text style={styles.highScoreText}>최고 점수: {highScore}</Text>
         </View>
-
-        <View style={styles.infoContainer}>
-          <View style={styles.infoItem}>
-            <MaterialCommunityIcons name="plus" size={24} color="#4CAF50" />
-            <Text style={styles.infoText}>일반 문제: 1점</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <MaterialCommunityIcons name="star" size={24} color="#FFD700" />
-            <Text style={styles.infoText}>특수 문제: 보너스 효과</Text>
-          </View>
-          <View style={styles.infoItem}>
-            <MaterialCommunityIcons name="lightning-bolt" size={24} color="#FF9800" />
-            <Text style={styles.infoText}>콤보로 더 많은 점수</Text>
-          </View>
+      )}
+      
+      <View style={styles.instructions}>
+        <Text style={styles.instructionTitle}>게임 방법</Text>
+        <View style={styles.instructionItem}>
+          <Plus size={16} color="#4CAF50" />
+          <Text style={styles.instructionText}>일반 문제: 1점 획득</Text>
         </View>
-
-        {highScore > 0 && (
-          <View style={styles.highScoreContainer}>
-            <MaterialCommunityIcons name="trophy" size={24} color="#FFD700" />
-            <Text style={styles.highScoreText}>최고 점수: {highScore}</Text>
-          </View>
-        )}
-
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
-            style={[styles.button, styles.startButton]}
-            onPress={onStart}
-            accessibilityLabel="게임 시작"
-            accessibilityHint="게임을 시작합니다"
-          >
-            <MaterialCommunityIcons name="play" size={24} color="#fff" />
-            <Text style={styles.buttonText}>게임 시작</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity
-            style={[styles.button, styles.exitButton]}
-            onPress={() => {
-              console.log('Exit button pressed in QuickMath StartScreen - navigating to main menu');
-              onExit();
-            }}
-            accessibilityLabel="나가기"
-            accessibilityHint="게임을 종료하고 메인 화면으로 돌아갑니다"
-          >
-            <MaterialCommunityIcons name="exit-to-app" size={24} color="#fff" />
-            <Text style={styles.buttonText}>나가기</Text>
-          </TouchableOpacity>
+        <View style={styles.instructionItem}>
+          <Star size={16} color="#FFD700" />
+          <Text style={styles.instructionText}>특수 문제: 보너스 효과</Text>
+        </View>
+        <View style={styles.instructionItem}>
+          <Zap size={16} color="#FF9800" />
+          <Text style={styles.instructionText}>콤보로 더 많은 점수</Text>
+        </View>
+        <View style={styles.instructionItem}>
+          <Clock size={16} color="#2196F3" />
+          <Text style={styles.instructionText}>빠르게 정답을 입력하세요</Text>
         </View>
       </View>
+
+      <TouchableOpacity style={styles.exitButton} onPress={handleExit}>
+        <Text style={styles.exitButtonText}>나가기</Text>
+      </TouchableOpacity>
     </View>
   );
-});
-
-StartScreen.displayName = 'StartScreen';
+}
 
 const styles = StyleSheet.create({
   container: {
-    ...StyleSheet.absoluteFillObject,
+    flex: 1,
+    backgroundColor: COLORS.BACKGROUND,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
-  },
-  content: {
-    backgroundColor: 'rgba(255, 255, 255, 0.95)',
-    borderRadius: 20,
-    padding: 24,
-    width: '85%',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
-  },
-  titleContainer: {
-    alignItems: 'center',
-    marginBottom: 32,
+    padding: 20,
   },
   title: {
-    fontSize: 36,
+    fontSize: 48,
     fontWeight: 'bold',
-    color: '#000',
-    marginTop: 16,
-    marginBottom: 8,
+    color: COLORS.PACMAN,
+    marginBottom: 10,
+    textShadowColor: COLORS.PACMAN,
+    textShadowOffset: { width: 0, height: 0 },
+    textShadowRadius: 10,
+    letterSpacing: 2,
   },
   subtitle: {
-    fontSize: 16,
-    color: '#666',
-    textAlign: 'center',
+    fontSize: 18,
+    color: '#FFF',
+    marginBottom: 60,
+    opacity: 0.8,
   },
-  infoContainer: {
-    width: '100%',
-    marginBottom: 24,
+  startButton: {
+    backgroundColor: COLORS.PACMAN,
+    paddingHorizontal: 50,
+    paddingVertical: 18,
+    borderRadius: 30,
+    marginBottom: 30,
+    shadowColor: COLORS.PACMAN,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.5,
+    shadowRadius: 8,
+    elevation: 8,
   },
-  infoItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 12,
-    paddingHorizontal: 16,
-  },
-  infoText: {
-    fontSize: 16,
-    color: '#333',
-    marginLeft: 12,
+  startButtonText: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: COLORS.BACKGROUND,
+    letterSpacing: 1,
   },
   highScoreContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: 'rgba(255, 215, 0, 0.2)',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
     borderRadius: 20,
-    marginBottom: 24,
+    marginBottom: 30,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 215, 0, 0.3)',
   },
   highScoreText: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#FFD700',
     marginLeft: 8,
   },
-  buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    width: '100%',
+  instructions: {
+    alignItems: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    padding: 20,
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    marginBottom: 30,
   },
-  button: {
+  instructionTitle: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: COLORS.PACMAN,
+    marginBottom: 15,
+    textAlign: 'center',
+    alignSelf: 'center',
+  },
+  instructionItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 24,
-    borderRadius: 12,
-    minWidth: 140,
+    marginBottom: 8,
   },
-  startButton: {
-    backgroundColor: '#667eea',
+  instructionText: {
+    fontSize: 14,
+    color: '#FFF',
+    marginLeft: 8,
+    lineHeight: 20,
   },
   exitButton: {
     backgroundColor: '#F44336',
+    paddingHorizontal: 40,
+    paddingVertical: 12,
+    borderRadius: 25,
+    shadowColor: '#F44336',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 4,
   },
-  buttonText: {
-    color: '#fff',
+  exitButtonText: {
     fontSize: 16,
     fontWeight: 'bold',
-    marginLeft: 8,
+    color: '#FFF',
+    letterSpacing: 1,
   },
 }); 

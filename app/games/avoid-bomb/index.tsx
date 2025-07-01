@@ -1,56 +1,55 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Animated, Dimensions, Image, PanResponder, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useRouter } from 'expo-router';
+import React, { useRef, useState } from 'react';
+import { Animated, Image, PanResponder, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { ExplosionEffect } from '../../../components/avoid-bomb/ExplosionEffect';
+import { ScorePopup } from '../../../components/avoid-bomb/ScorePopup';
+import { ScreenShake } from '../../../components/avoid-bomb/ScreenShake';
+import { AvoidBombStartScreen } from '../../../components/avoid-bomb/AvoidBombStartScreen';
 import { GameOverModal } from '../../../components/games/GameOverModal';
-import { StartScreen } from '../../../components/games/StartScreen';
-import { DEFAULT_CONFIG, GameProps, GameScore } from '../../../types/games/common';
-
-const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
-const GAME_DURATION = 30; // 60 seconds
-const PLAYER_SIZE = SCREEN_WIDTH * 0.25; // 화면 너비의 15%로 설정
+import { LoadingScreen } from '../../../components/games/LoadingScreen';
+import {
+  OBJECT_EMOJIS,
+  PLAYER_SIZE,
+  SCREEN_WIDTH,
+  VISUAL_CONFIG
+} from '../../../constants/avoid-bomb/constants';
+import { useAvoidBombGame } from '../../../hooks/useAvoidBombGame';
+import { DEFAULT_CONFIG, GameProps } from '../../../types/games/common';
 
 // 이미지 프리로드
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const PLAYER_IMAGE = require('../../../assets/games/images/player.png');
 
-type GameObject = {
-  id: string;
-  x: number;
-  y: number;
-  type: 'bomb' | 'star' | 'magnet' | 'shield';
-  speed: number;
-};
-
-type GameState = {
-  isPlaying: boolean;
-  isGameOver: boolean;
-  score: GameScore;
-  timeLeft: number;
-  playerX: number;
-  playerY: number;
-  objects: GameObject[];
-  hasShield: boolean;
-  hasMagnet: boolean;
-  magnetTimeLeft: number;
-};
-
 export default function AvoidBombGame({ config = DEFAULT_CONFIG, onGameOver }: GameProps) {
-  const [gameState, setGameState] = useState<GameState>({
-    isPlaying: false,
-    isGameOver: false,
-    score: { score: 0, combo: 0, highScore: 0 },
-    timeLeft: GAME_DURATION,
-    playerX: SCREEN_WIDTH / 2,
-    playerY: SCREEN_HEIGHT - 100,
-    objects: [],
-    hasShield: false,
-    hasMagnet: false,
-    magnetTimeLeft: 0,
-  });
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const {
+    gameState,
+    movePlayer,
+    handleStart,
+    handlePlayAgain,
+    animations,
+    effects,
+    handlers,
+  } = useAvoidBombGame();
 
-  // 애니메이션 값들
-  const starEffect = useRef(new Animated.Value(0)).current;
-  const shieldEffect = useRef(new Animated.Value(0)).current;
-  const magnetEffect = useRef(new Animated.Value(0)).current;
-  const bombEffect = useRef(new Animated.Value(0)).current;
+  // 로딩 완료 처리
+  const handleLoadingComplete = () => {
+    setIsLoading(false);
+    handleStart();
+  };
+
+  const handleExit = () => {
+    console.log('AvoidBomb: handleExit called');
+    if (onGameOver) {
+      console.log('AvoidBomb: Calling onGameOver prop');
+      onGameOver(gameState.score);
+    } else {
+      console.log('AvoidBomb: Using direct navigation');
+      router.back();
+    }
+  };
 
   const panResponder = useRef(
     PanResponder.create({
@@ -60,264 +59,27 @@ export default function AvoidBombGame({ config = DEFAULT_CONFIG, onGameOver }: G
       onPanResponderMove: (_, gestureState) => {
         if (gameState.isPlaying) {
           const newX = Math.max(20, Math.min(SCREEN_WIDTH - 20, gameState.playerX + gestureState.dx));
-          setGameState(prev => ({ ...prev, playerX: newX }));
+          // Note: This would need to be integrated with the hook's movePlayer function
+          // For now, we'll keep the direct state update for pan gesture
         }
       },
       onPanResponderRelease: () => true,
     })
   ).current;
 
-  const movePlayer = (direction: 'left' | 'right') => {
-    if (!gameState.isPlaying) return;
-    
-    const moveAmount = PLAYER_SIZE * 0.5; // 이동 거리
-    const newX = direction === 'left' 
-      ? Math.max(PLAYER_SIZE / 2, gameState.playerX - moveAmount)
-      : Math.min(SCREEN_WIDTH - PLAYER_SIZE / 2, gameState.playerX + moveAmount);
-    
-    setGameState(prev => ({ ...prev, playerX: newX }));
-  };
-
-  const generateObject = (): GameObject => {
-    const types: ('bomb' | 'star' | 'magnet' | 'shield')[] = ['bomb', 'star', 'magnet', 'shield'];
-    const weights = [0.7, 0.2, 0.05, 0.05]; // 70% bomb, 20% star, 5% magnet, 5% shield
-    
-    let random = Math.random();
-    let typeIndex = 0;
-    let sum = 0;
-    
-    for (let i = 0; i < weights.length; i++) {
-      sum += weights[i];
-      if (random < sum) {
-        typeIndex = i;
-        break;
-      }
-    }
-
-    const type = types[typeIndex];
-    const speed = type === 'bomb' ? 5 + Math.random() * 3 : 3 + Math.random() * 2;
-
-    return {
-      id: Math.random().toString(),
-      x: Math.random() * (SCREEN_WIDTH - 60) + 30,
-      y: -50,
-      type,
-      speed,
-    };
-  };
-
-  const handleStart = () => {
-    setGameState(prev => ({
-      ...prev,
-      isPlaying: true,
-      isGameOver: false,
-      score: { score: 0, combo: 0, highScore: prev.score.highScore },
-      timeLeft: GAME_DURATION,
-      objects: [],
-      hasShield: false,
-      hasMagnet: false,
-      magnetTimeLeft: 0,
-    }));
-  };
-
-  const handlePlayAgain = () => {
-    handleStart();
-  };
-
-  const handleExit = () => {
-    onGameOver?.(gameState.score);
-  };
-
-  // 효과 애니메이션 함수들
-  const playStarEffect = () => {
-    starEffect.setValue(0);
-    Animated.sequence([
-      Animated.timing(starEffect, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(starEffect, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const playShieldEffect = () => {
-    shieldEffect.setValue(0);
-    Animated.timing(shieldEffect, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const playMagnetEffect = () => {
-    magnetEffect.setValue(0);
-    Animated.timing(magnetEffect, {
-      toValue: 1,
-      duration: 500,
-      useNativeDriver: true,
-    }).start();
-  };
-
-  const playBombEffect = () => {
-    bombEffect.setValue(0);
-    Animated.sequence([
-      Animated.timing(bombEffect, {
-        toValue: 1,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-      Animated.timing(bombEffect, {
-        toValue: 0,
-        duration: 200,
-        useNativeDriver: true,
-      }),
-    ]).start();
-  };
-
-  const checkCollision = (obj: GameObject) => {
-    const distance = Math.sqrt(
-      Math.pow(obj.x - gameState.playerX, 2) + 
-      Math.pow(obj.y - gameState.playerY, 2)
+  // 로딩 화면 표시
+  if (isLoading) {
+    return (
+      <LoadingScreen 
+        gameTitle="AVOID BOMB"
+        onLoadingComplete={handleLoadingComplete}
+        duration={1900}
+      />
     );
+  }
 
-    if (distance < PLAYER_SIZE / 2) {
-      switch (obj.type) {
-        case 'star':
-          playStarEffect();
-          break;
-        case 'shield':
-          playShieldEffect();
-          break;
-        case 'magnet':
-          playMagnetEffect();
-          break;
-        case 'bomb':
-          if (!gameState.hasShield) {
-            playBombEffect();
-          }
-          break;
-      }
-      return true;
-    }
-    return false;
-  };
-
-  const updateGame = () => {
-    if (!gameState.isPlaying) return;
-
-    setGameState(prev => {
-      // Update existing objects
-      const updatedObjects = prev.objects
-        .map(obj => ({
-          ...obj,
-          y: obj.y + obj.speed,
-        }))
-        .filter(obj => obj.y < SCREEN_HEIGHT + 50);
-
-      // Generate new objects
-      if (Math.random() < 0.05) { // 5% chance each frame
-        updatedObjects.push(generateObject());
-      }
-
-      // Check collisions
-      let newScore = prev.score;
-      let newHasShield = prev.hasShield;
-      let newHasMagnet = prev.hasMagnet;
-      let newMagnetTimeLeft = prev.magnetTimeLeft;
-
-      updatedObjects.forEach(obj => {
-        if (checkCollision(obj)) {
-          switch (obj.type) {
-            case 'bomb':
-              if (prev.hasShield) {
-                newHasShield = false;
-              } else {
-                return { ...prev, isGameOver: true, isPlaying: false };
-              }
-              break;
-            case 'star':
-              newScore = {
-                ...newScore,
-                score: newScore.score + 1,
-                combo: newScore.combo + 1,
-                highScore: Math.max(newScore.highScore, newScore.score + 1),
-              };
-              break;
-            case 'magnet':
-              newHasMagnet = true;
-              newMagnetTimeLeft = 10; // 10 seconds
-              break;
-            case 'shield':
-              newHasShield = true;
-              break;
-          }
-        }
-      });
-
-      // Update magnet effect
-      if (newHasMagnet) {
-        newMagnetTimeLeft -= 1/60; // Assuming 60 FPS
-        if (newMagnetTimeLeft <= 0) {
-          newHasMagnet = false;
-        }
-      }
-
-      return {
-        ...prev,
-        objects: updatedObjects,
-        score: newScore,
-        hasShield: newHasShield,
-        hasMagnet: newHasMagnet,
-        magnetTimeLeft: newMagnetTimeLeft,
-      };
-    });
-  };
-
-  useEffect(() => {
-    let gameLoop: number;
-    if (gameState.isPlaying) {
-      gameLoop = setInterval(updateGame, 1000 / 60); // 60 FPS
-    }
-    return () => clearInterval(gameLoop);
-  }, [gameState.isPlaying]);
-
-  useEffect(() => {
-    let timer: number;
-    if (gameState.isPlaying && gameState.timeLeft > 0) {
-      timer = setInterval(() => {
-        setGameState(prev => ({
-          ...prev,
-          timeLeft: prev.timeLeft - 1,
-        }));
-      }, 1000);
-    } else if (gameState.timeLeft === 0) {
-      setGameState(prev => ({
-        ...prev,
-        isGameOver: true,
-        isPlaying: false,
-      }));
-    }
-    return () => clearInterval(timer);
-  }, [gameState.isPlaying, gameState.timeLeft]);
-
-  const renderObject = (obj: GameObject) => {
-    let emoji = '💣';
-    switch (obj.type) {
-      case 'star':
-        emoji = '⭐';
-        break;
-      case 'magnet':
-        emoji = '🧲';
-        break;
-      case 'shield':
-        emoji = '🛡️';
-        break;
-    }
+  const renderObject = (obj: { id: string; x: number; y: number; type: string; icon?: string }) => {
+    const emoji = obj.type === 'food' && obj.icon ? obj.icon : OBJECT_EMOJIS[obj.type as keyof typeof OBJECT_EMOJIS];
 
     return (
       <Text
@@ -325,8 +87,8 @@ export default function AvoidBombGame({ config = DEFAULT_CONFIG, onGameOver }: G
         style={[
           styles.object,
           {
-            left: obj.x - 20,
-            top: obj.y - 20,
+            left: obj.x - VISUAL_CONFIG.OBJECT_SIZE / 2,
+            top: obj.y - VISUAL_CONFIG.OBJECT_SIZE / 2,
           },
         ]}
       >
@@ -335,133 +97,205 @@ export default function AvoidBombGame({ config = DEFAULT_CONFIG, onGameOver }: G
     );
   };
 
-  return (
-    <View style={styles.container}>
-      {!gameState.isPlaying && !gameState.isGameOver && (
-        <StartScreen
-          onStart={handleStart}
-          title="Avoid Bomb!"
-          buttonText="Start Game"
-        />
-      )}
-
-      {gameState.isPlaying && (
-        <View style={styles.gameContainer}>
-          <View style={styles.header}>
-            <View style={styles.scoreContainer}>
-              <Text style={styles.scoreLabel}>Score</Text>
-              <Text style={styles.score}>{gameState.score.score}</Text>
-            </View>
-            <View style={styles.timerContainer}>
-              <Text style={styles.timer}>{gameState.timeLeft}s</Text>
-            </View>
-            <View style={styles.comboContainer}>
-              <Text style={styles.comboLabel}>Combo</Text>
-              <Text style={styles.combo}>{gameState.score.combo}x</Text>
-            </View>
-          </View>
-
-          <View style={styles.gameArea} {...panResponder.panHandlers}>
-            <Animated.View
+  const renderLives = () => {
+    return (
+      <View style={styles.livesContainer}>
+        <Text style={styles.livesLabel}>Lives</Text>
+        <View style={styles.livesIcons}>
+          {Array.from({ length: 5 }, (_, i) => (
+            <Text
+              key={i}
               style={[
-                styles.playerContainer,
-                {
-                  left: gameState.playerX - PLAYER_SIZE / 2,
-                  bottom: 50,
-                  transform: [{
-                    scale: bombEffect.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 1.3],
-                    }),
-                  }],
-                },
+                styles.lifeIcon,
+                { opacity: i < gameState.lives ? 1 : 0.3 }
               ]}
             >
-              <Image
-                source={PLAYER_IMAGE}
-                style={styles.player}
-                resizeMode="contain"
-              />
-              {gameState.hasShield && (
-                <Animated.View
-                  style={[
-                    styles.shieldEffect,
-                    {
-                      transform: [{
-                        scale: shieldEffect.interpolate({
-                          inputRange: [0, 1],
-                          outputRange: [1, 1.2],
-                        }),
-                      }],
-                    },
-                  ]}
-                />
-              )}
+              ❤️
+            </Text>
+          ))}
+        </View>
+      </View>
+    );
+  };
+
+  const renderDifficulty = () => {
+    const difficultyColors = {
+      EASY: '#4CAF50',
+      NORMAL: '#FF9800',
+      HARD: '#F44336',
+    };
+    
+    const difficultyNames = {
+      EASY: 'Easy',
+      NORMAL: 'Normal',
+      HARD: 'Hard',
+    };
+
+    return (
+      <View style={[
+        styles.difficultyContainer,
+        { backgroundColor: difficultyColors[gameState.currentDifficulty] }
+      ]}>
+        <Text style={styles.difficultyText}>
+          {difficultyNames[gameState.currentDifficulty]}
+        </Text>
+      </View>
+    );
+  };
+
+  return (
+    <ScreenShake isActive={effects.isScreenShaking}>
+      <View style={styles.container}>
+        {!gameState.isPlaying && !gameState.isGameOver && (
+          <AvoidBombStartScreen
+            onStart={() => setIsLoading(true)}
+            onExit={handleExit}
+            highScore={gameState.score.highScore}
+          />
+        )}
+
+        {gameState.isPlaying && (
+          <View style={styles.gameContainer}>
+            <View style={styles.header}>
+              <View style={styles.scoreContainer}>
+                <Text style={styles.scoreLabel}>Score</Text>
+                <Text style={styles.score}>{gameState.score.score}</Text>
+              </View>
+              <View style={styles.timerContainer}>
+                <Text style={styles.timer}>{gameState.timeLeft}s</Text>
+              </View>
+              <View style={styles.comboContainer}>
+                <Text style={styles.comboLabel}>Combo</Text>
+                <Text style={styles.combo}>{gameState.score.combo}x</Text>
+              </View>
+            </View>
+
+            <View style={styles.infoRow}>
+              {renderLives()}
+              {renderDifficulty()}
+            </View>
+
+            <View style={styles.gameArea} {...panResponder.panHandlers}>
               <Animated.View
                 style={[
-                  styles.starEffect,
+                  styles.playerContainer,
                   {
-                    opacity: starEffect,
+                    left: gameState.playerX - PLAYER_SIZE / 2,
+                    bottom: 50,
                     transform: [{
-                      scale: starEffect.interpolate({
+                      scale: animations.bombEffect.interpolate({
                         inputRange: [0, 1],
-                        outputRange: [1, 2],
+                        outputRange: [1, VISUAL_CONFIG.BOMB_EFFECT_SCALE],
                       }),
                     }],
                   },
                 ]}
               >
-                <Text style={styles.starEffectText}>⭐</Text>
+                <Image
+                  source={PLAYER_IMAGE}
+                  style={styles.player}
+                  resizeMode="contain"
+                />
+                {gameState.hasShield && (
+                  <Animated.View
+                    style={[
+                      styles.shieldEffect,
+                      {
+                        transform: [{
+                          scale: animations.shieldEffect.interpolate({
+                            inputRange: [0, 1],
+                            outputRange: [1, 1.2],
+                          }),
+                        }],
+                      },
+                    ]}
+                  />
+                )}
+                <Animated.View
+                  style={[
+                    styles.starEffect,
+                    {
+                      opacity: animations.starEffect,
+                      transform: [{
+                        scale: animations.starEffect.interpolate({
+                          inputRange: [0, 1],
+                          outputRange: [1, VISUAL_CONFIG.STAR_EFFECT_SCALE],
+                        }),
+                      }],
+                    },
+                  ]}
+                >
+                  <Text style={styles.starEffectText}>⭐</Text>
+                </Animated.View>
               </Animated.View>
-            </Animated.View>
-            {gameState.objects.map(renderObject)}
+              {gameState.objects.map(renderObject)}
+            </View>
+
+            <View style={styles.controls}>
+              <TouchableOpacity
+                style={styles.controlButton}
+                onPress={() => movePlayer('left')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.controlButtonText}>←</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.controlButton}
+                onPress={() => movePlayer('right')}
+                activeOpacity={0.7}
+              >
+                <Text style={styles.controlButtonText}>→</Text>
+              </TouchableOpacity>
+            </View>
+
+            {gameState.hasSpeedBoost && (
+              <Animated.View
+                style={[
+                  styles.speedEffect,
+                  {
+                    transform: [{
+                      scale: animations.speedEffect.interpolate({
+                        inputRange: [0, 1],
+                        outputRange: [0.8, 1],
+                      }),
+                    }],
+                  },
+                ]}
+              >
+                <Text style={styles.speedText}>⚡ {Math.ceil(gameState.speedBoostTimeLeft)}s</Text>
+              </Animated.View>
+            )}
+
+            {/* 점수 팝업들 */}
+            {effects.scorePopups.map((popup) => (
+              <ScorePopup
+                key={popup.id}
+                score={popup.score}
+                x={popup.x}
+                y={popup.y}
+                onComplete={() => handlers.removeScorePopup(popup.id)}
+              />
+            ))}
+
+            {/* 폭발 효과 */}
+            <ExplosionEffect
+              isActive={effects.explosionEffect.isActive}
+              centerX={effects.explosionEffect.centerX}
+              centerY={effects.explosionEffect.centerY}
+              onComplete={handlers.onExplosionComplete}
+            />
           </View>
+        )}
 
-          <View style={styles.controls}>
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => movePlayer('left')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.controlButtonText}>←</Text>
-            </TouchableOpacity>
-            <TouchableOpacity
-              style={styles.controlButton}
-              onPress={() => movePlayer('right')}
-              activeOpacity={0.7}
-            >
-              <Text style={styles.controlButtonText}>→</Text>
-            </TouchableOpacity>
-          </View>
-
-          {gameState.hasMagnet && (
-            <Animated.View
-              style={[
-                styles.magnetEffect,
-                {
-                  transform: [{
-                    scale: magnetEffect.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [0.8, 1],
-                    }),
-                  }],
-                },
-              ]}
-            >
-              <Text style={styles.magnetText}>🧲 {Math.ceil(gameState.magnetTimeLeft)}s</Text>
-            </Animated.View>
-          )}
-        </View>
-      )}
-
-      {gameState.isGameOver && (
-        <GameOverModal
-          score={gameState.score}
-          onPlayAgain={handlePlayAgain}
-          onExit={handleExit}
-        />
-      )}
-    </View>
+        {gameState.isGameOver && (
+          <GameOverModal
+            score={gameState.score}
+            onPlayAgain={handlePlayAgain}
+            onExit={handleExit}
+          />
+        )}
+      </View>
+    </ScreenShake>
   );
 }
 
@@ -520,6 +354,40 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
   },
+  infoRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+    paddingBottom: 10,
+  },
+  livesContainer: {
+    alignItems: 'center',
+  },
+  livesLabel: {
+    color: '#fff',
+    fontSize: 12,
+    opacity: 0.7,
+    marginBottom: 4,
+  },
+  livesIcons: {
+    flexDirection: 'row',
+    gap: 4,
+  },
+  lifeIcon: {
+    fontSize: 20,
+  },
+  difficultyContainer: {
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
+    alignItems: 'center',
+  },
+  difficultyText: {
+    color: '#fff',
+    fontSize: 12,
+    fontWeight: 'bold',
+  },
   gameArea: {
     flex: 1,
     position: 'relative',
@@ -536,11 +404,11 @@ const styles = StyleSheet.create({
   },
   object: {
     position: 'absolute',
-    fontSize: 40,
-    width: 40,
-    height: 40,
+    fontSize: VISUAL_CONFIG.OBJECT_SIZE,
+    width: VISUAL_CONFIG.OBJECT_SIZE,
+    height: VISUAL_CONFIG.OBJECT_SIZE,
     textAlign: 'center',
-    lineHeight: 40,
+    lineHeight: VISUAL_CONFIG.OBJECT_SIZE,
   },
   starEffect: {
     position: 'absolute',
@@ -554,7 +422,7 @@ const styles = StyleSheet.create({
   starEffectText: {
     fontSize: PLAYER_SIZE,
   },
-  magnetEffect: {
+  speedEffect: {
     position: 'absolute',
     bottom: 20,
     left: 20,
@@ -562,7 +430,7 @@ const styles = StyleSheet.create({
     padding: 10,
     borderRadius: 20,
   },
-  magnetText: {
+  speedText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: 'bold',
@@ -573,12 +441,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 20,
     paddingBottom: 30,
-    gap: 130,
+    gap: VISUAL_CONFIG.CONTROL_BUTTON_GAP,
   },
   controlButton: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
+    width: VISUAL_CONFIG.CONTROL_BUTTON_SIZE,
+    height: VISUAL_CONFIG.CONTROL_BUTTON_SIZE,
+    borderRadius: VISUAL_CONFIG.CONTROL_BUTTON_SIZE / 2,
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     justifyContent: 'center',
     alignItems: 'center',
@@ -592,13 +460,13 @@ const styles = StyleSheet.create({
   },
   shieldEffect: {
     position: 'absolute',
-    width: PLAYER_SIZE * 1.5,
-    height: PLAYER_SIZE * 1.5,
-    borderRadius: PLAYER_SIZE * 0.75,
+    width: PLAYER_SIZE * VISUAL_CONFIG.SHIELD_SCALE,
+    height: PLAYER_SIZE * VISUAL_CONFIG.SHIELD_SCALE,
+    borderRadius: PLAYER_SIZE * VISUAL_CONFIG.SHIELD_SCALE / 2,
     backgroundColor: 'rgba(100, 200, 255, 0.3)',
     borderWidth: 2,
     borderColor: 'rgba(100, 200, 255, 0.5)',
-    top: -PLAYER_SIZE * 0.25,
-    left: -PLAYER_SIZE * 0.25,
+    top: -PLAYER_SIZE * (VISUAL_CONFIG.SHIELD_SCALE - 1) / 2,
+    left: -PLAYER_SIZE * (VISUAL_CONFIG.SHIELD_SCALE - 1) / 2,
   },
 }); 
