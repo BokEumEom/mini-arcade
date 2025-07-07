@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useColorScheme } from 'react-native';
 
 type ThemeType = 'dark' | 'light' | 'system';
@@ -19,6 +19,7 @@ const ThemeContext = createContext<ThemeContextType>({
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const systemTheme = useColorScheme();
   const [theme, setTheme] = useState<ThemeType>('system');
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     loadTheme();
@@ -30,30 +31,36 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (savedTheme) {
         setTheme(savedTheme as ThemeType);
       }
+      setIsLoaded(true);
     } catch (error) {
       console.error('Error loading theme:', error);
+      setIsLoaded(true);
     }
   };
 
-  const handleThemeChange = async (newTheme: ThemeType) => {
+  const handleThemeChange = useCallback(async (newTheme: ThemeType) => {
     try {
       await AsyncStorage.setItem('theme', newTheme);
       setTheme(newTheme);
     } catch (error) {
       console.error('Error saving theme:', error);
     }
-  };
+  }, []);
 
-  const isDark = theme === 'system' ? systemTheme === 'dark' : theme === 'dark';
+  // Only calculate isDark after theme is loaded
+  const isDark = useMemo(() => {
+    if (!isLoaded) return false;
+    return theme === 'system' ? systemTheme === 'dark' : theme === 'dark';
+  }, [isLoaded, theme, systemTheme]);
+
+  const contextValue = useMemo(() => ({
+    theme,
+    setTheme: handleThemeChange,
+    isDark,
+  }), [theme, handleThemeChange, isDark]);
 
   return (
-    <ThemeContext.Provider
-      value={{
-        theme,
-        setTheme: handleThemeChange,
-        isDark,
-      }}
-    >
+    <ThemeContext.Provider value={contextValue}>
       {children}
     </ThemeContext.Provider>
   );

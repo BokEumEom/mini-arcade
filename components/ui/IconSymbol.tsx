@@ -91,6 +91,7 @@ import {
   Ghost,
   Zap,
   RefreshCcw,
+  Pickaxe,
 } from 'lucide-react-native';
 import React from 'react';
 import { StyleProp, ViewStyle } from 'react-native';
@@ -175,7 +176,8 @@ export type IconName =
   | 'videotape'
   | 'castle'
   | 'ghost'
-  | 'refresh-ccw';
+  | 'refresh-ccw'
+  | 'pickaxe';
 
 // Category-based icon mappings for memory game
 export const MEMORY_ICON_CATEGORIES = {
@@ -284,6 +286,7 @@ const MAPPING = {
   'castle': Castle,
   'ghost': Ghost,
   'refresh-ccw': RefreshCcw,
+  'pickaxe': Pickaxe,
 } as const;
 
 interface IconSymbolProps {

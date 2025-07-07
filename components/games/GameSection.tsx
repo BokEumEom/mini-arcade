@@ -1,14 +1,7 @@
-import { Link } from 'expo-router';
+import { router } from 'expo-router';
 import React from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
-import { Pressable } from 'react-native';
-import Animated, {
-  useAnimatedStyle,
-  useSharedValue,
-  withSequence,
-  withSpring
-} from 'react-native-reanimated';
 import { APP_THEME } from '../../constants/appTheme';
 import { useTheme } from '../../contexts/ThemeContext';
 import { IconName, IconSymbol } from '../ui/IconSymbol';
@@ -38,33 +31,12 @@ function SmallGameCard({
 }) {
   const { isDark } = useTheme();
   const colors = isDark ? APP_THEME.dark : APP_THEME.light;
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.95);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSequence(
-      withSpring(1.05),
-      withSpring(1)
-    );
-  };
-
-  const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
   return (
-    <AnimatedPressable 
-      onPressIn={handlePressIn}
-      onPressOut={handlePressOut}
+    <View 
       style={[
         smallCardStyles.container,
-        { backgroundColor: colors.card.background },
-        animatedStyle
+        { backgroundColor: colors.card.background }
       ]}
     >
       <View style={smallCardStyles.content}>
@@ -82,7 +54,7 @@ function SmallGameCard({
           </Text>
         </View>
       </View>
-    </AnimatedPressable>
+    </View>
   );
 }
 
@@ -139,6 +111,11 @@ export function GameSection({
 
   if (games.length === 0) return null;
 
+  const handleGamePress = (gameId: string) => {
+    console.log('Game pressed:', gameId);
+    router.push(`/games/${gameId}`);
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -159,13 +136,13 @@ export function GameSection({
       >
         {games.map((game) => (
           <View key={game.id} style={styles.gameCardContainer}>
-            <Link href={`/games/${game.id}`} asChild>
+            <Pressable onPress={() => handleGamePress(game.id)}>
               <SmallGameCard
                 title={game.title}
                 description={game.description}
                 icon={game.icon}
               />
-            </Link>
+            </Pressable>
             {game.isNew && (
               <View style={[styles.newBadge, { backgroundColor: colors.tint }]}>
                 <Text style={styles.newText}>NEW</Text>

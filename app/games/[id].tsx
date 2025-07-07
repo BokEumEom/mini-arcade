@@ -9,12 +9,12 @@ import { StyleSheet } from 'react-native';
 import Game2048 from './2048';
 import AvoidBombGame from './avoid-bomb';
 import MemoryGame from './memory';
+import MinesweeperGame from './minesweeper';
 import NumberPuzzleGame from './number-puzzle';
 import OthelloGame from './othello';
 import PacManGame from './pac-man';
 import QuickMathGame from './quick-math';
 import RockPaperScissorsGame from './rock-paper-scissors';
-import SwipeSquareGame from './swipe-square';
 import TapCircleGame from './tap-circle';
 import TetrisGame from './tetris';
 import TowerDefenseGame from './tower-defense';
@@ -69,8 +69,8 @@ export default function GameScreen() {
         return <PacManGame />;
       case 'quick-math':
         return <QuickMathGame />;
-      case 'swipe-square':
-        return <SwipeSquareGame />;
+      case 'minesweeper':
+        return <MinesweeperGame />;
       case 'tap-circle':
         return <TapCircleGame />;
       case 'number-puzzle':

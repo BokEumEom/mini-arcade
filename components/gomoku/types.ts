@@ -2,16 +2,22 @@
 export const BOARD_SIZE = 15;
 export const WINNING_LENGTH = 5;
 
+// 게임 모드
+export type GameMode = 'human-vs-human' | 'human-vs-cpu' | 'cpu-vs-cpu';
+
+// 게임 상태
+export type GameStatus = 'playing' | 'won' | 'draw';
+
 // 플레이어 타입
 export type GomokuPlayer = 'black' | 'white';
 
-// 셀 타입
+// 바둑돌 타입
 export type GomokuCell = GomokuPlayer | null;
 
-// 게임 상태 타입
-export type GameStatus = 'playing' | 'won' | 'draw';
+// 보드 배열 타입
+export type BoardArray = readonly (readonly GomokuCell[])[];
 
-// 방향 타입 (승리 체크용)
+// 방향 타입 (row, col)
 export type Direction = readonly [number, number];
 
 // 보드 위치 타입
@@ -28,6 +34,8 @@ export interface GameState {
   readonly winner: GomokuPlayer | null;
   readonly moveCount: number;
   readonly lastMove: BoardPosition | null;
+  readonly gameMode: GameMode;
+  readonly isAITurn: boolean;
 }
 
 // 게임 액션 타입
@@ -50,6 +58,8 @@ export interface GomokuHeaderProps {
   readonly moveCount: number;
   readonly gameStatus: GameStatus;
   readonly onReset: () => void;
+  readonly gameMode: GameMode;
+  readonly onExit: () => void;
 }
 
 export interface GomokuCellProps {
@@ -58,10 +68,14 @@ export interface GomokuCellProps {
   readonly onPress: (position: BoardPosition) => void;
   readonly disabled: boolean;
   readonly isLastMove: boolean;
+  readonly cellSize?: number;
 }
 
-// 유틸리티 타입들
-export type BoardArray = readonly (readonly GomokuCell[])[];
+export interface GomokuStartScreenProps {
+  readonly onStart: (mode: GameMode) => void;
+  readonly onExit: () => void;
+  readonly highScore: number;
+}
 
 // 게임 로직 함수 타입들
 export interface GameLogic {

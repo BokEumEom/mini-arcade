@@ -1,4 +1,5 @@
 import { BlurView } from 'expo-blur';
+import { RefreshCw, X } from 'lucide-react-native';
 import React from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { GomokuPlayer } from './types';
@@ -83,13 +84,19 @@ export function GomokuGameOverModal({
             style={[styles.button, styles.playAgainButton]} 
             onPress={onPlayAgain}
           >
-            <Text style={styles.buttonText}>다시 시작</Text>
+            <View style={styles.buttonContent}>
+              <RefreshCw size={20} color="#fff" />
+              <Text style={styles.buttonText}>다시 시작</Text>
+            </View>
           </TouchableOpacity>
           <TouchableOpacity 
             style={[styles.button, styles.exitButton]} 
             onPress={onExit}
           >
-            <Text style={styles.buttonText}>나가기</Text>
+            <View style={styles.buttonContent}>
+              <X size={20} color="#fff" />
+              <Text style={styles.buttonText}>나가기</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -182,9 +189,14 @@ const styles = StyleSheet.create({
   exitButton: {
     backgroundColor: '#f44336',
   },
+  buttonContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
   buttonText: {
     fontSize: 16,
     fontWeight: 'bold',
     color: '#fff',
+    marginLeft: 8,
   },
 }); 
